@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xml>
+    <settings>
+        <login>EMAIL</login> <!-- Логин в Электронный Дневник -->
+        <password>TEXT</password> <!-- Пароль -->
+        <token>KEY</token> <!-- API VK -->
+        <groupid>ID</groupid> <!-- ID группы -->
+    </settings>
+</xml>
