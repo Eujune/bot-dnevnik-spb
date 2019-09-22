@@ -6,4 +6,37 @@
         <token>KEY</token> <!-- API VK -->
         <groupid>ID</groupid> <!-- ID группы -->
     </settings>
+    <timetable>
+
+        <!-- Понедельник -->
+        <day>
+            <lesson>НАЗВАНИЕ_ПРЕДМЕТА ССЫЛКА
+            </lesson>
+        </day>
+
+        <!-- Вторник -->
+        <day>
+
+        </day>
+
+        <!-- Среда -->
+        <day>
+
+        </day>
+
+        <!-- Четверг -->
+        <day>
+
+        </day>
+
+        <!-- Пятница -->
+        <day>
+
+        </day>
+
+        <!-- Суббота -->
+        <day>
+
+        </day>
+    </timetable>
 </xml>

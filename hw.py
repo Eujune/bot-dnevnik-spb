@@ -3,21 +3,15 @@ from bs4 import BeautifulSoup
 import datetime
 
 XML = open('settings.xml', 'r', encoding="utf-8").read()
-SETTINGS = BeautifulSoup(XML, "lxml")
+SETTINGS = BeautifulSoup(XML, "lxml").find('settings')
 LOGIN = SETTINGS.find('login').text
 PASSWORD = SETTINGS.find('password').text
 
 
 def get_session(l, p):
     session = r.Session()
+    data = {'Login': l, 'Password': p, 'doLogin': 1, 'authsubmit': 'Войти'}
     session.get('https://dnevnik2.petersburgedu.ru/login')
-    data = {
-        'Login': l,
-        'Password': p,
-        'doLogin': 1,
-        'authsubmit': 'Войти'
-    }
-
     session.post('https://petersburgedu.ru/user/auth/login/n', data=data)
     return session
 
@@ -33,44 +27,41 @@ def get_next_day():
     return day
 
 
-def get_homework():
-    session = get_session(LOGIN, PASSWORD)
-    url = 'https://petersburgedu.ru/dnevnik/timetable'
-    timetable_html = session.get(url).text
-    n_day = 'day-' + str(get_next_day().isoweekday())
+def get_day_timetable(day):
+    timetable = BeautifulSoup(XML, "lxml").find('timetable')
+    timetable_of_day_raw = ' '.join(timetable.findAll('day')[day].text.split()).split()
+    timetable_of_day = tuple(zip(timetable_of_day_raw[::2], timetable_of_day_raw[1::2]))
+    return timetable_of_day
 
-    links = []
-    lessons = []
-    homework = []
-    result = 'Домашнее задание на ' + str(get_next_day().strftime('%d.%m.%Y')) + '\n'\
-             + 'Также читайте сайт класса: loxxx.tk ' + '\n\n'
 
-    fut_timetable = BeautifulSoup(timetable_html, 'html.parser')
-    fut_timetable = fut_timetable.findAll('td', class_=n_day)
+class GetHomework:
+    def __init__(self):
+        self.session = get_session(LOGIN, PASSWORD)
 
-    for i in range(len(fut_timetable)):
-        if fut_timetable[i].find('a'):
-            links.append('https://petersburgedu.ru' + fut_timetable[i].find('a')['href'])
-            lessons.append(' '.join(fut_timetable[i].find('a').text.split()))
+        self.next_day = get_next_day()
+        self.next_day_int = get_next_day().isoweekday()
 
-    for link in links:
-        homework.append('')
-        lesson_timetable = session.get(link).text
-        l_soup = BeautifulSoup(lesson_timetable, 'html.parser')
-        work = l_soup.find('table', class_="subject-stat")
+        self.result = 'Домашнее задание на ' + str(self.next_day.strftime('%d.%m.%Y')) + '\n'\
+                      + 'Также читайте сайт класса: loxxx.tk ' + '\n\n'
 
-        if work:
-            work = l_soup.find('table', class_="subject-stat").find_all('td')[2].text
-            homework[-1] = ' '.join(work.split())
+    def tomorrow(self):
+        res = self.result
+        for lesson in get_day_timetable(self.next_day_int-1):
+            subj = lesson[0]
+            link = lesson[1]
 
-        if homework[-1] == '':
-            homework[-1] = 'Нет дз / Учитель его не написал'
+            subj_soup = BeautifulSoup(self.session.get(link).text, 'html.parser')
+            homework = subj_soup.find('table', class_="subject-stat")
 
-    for i in range(len(lessons)):
-        result += lessons[i] + ' - ' + homework[i] + '\n\n'
+            if homework:
+                homework = ' '.join(subj_soup.find('table', class_="subject-stat").find_all('td')[2].text.split())
 
-    return result
+            if homework == '' or not homework:
+                homework = 'Нет дз / Учитель его не написал'
+
+            res += subj + ' - ' + homework + '\n'
+        return res
 
 
 if __name__ == '__main__':
-    print(get_homework())
+    print(GetHomework().tomorrow())
