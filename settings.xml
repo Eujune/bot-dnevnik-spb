@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <xml>
     <settings>
-        <login>EMAIL</login> <!-- Логин в Электронный Дневник -->
-        <password>TEXT</password> <!-- Пароль -->
+        <login-1>login-1</login-1> <!-- Логин в Электронный Дневник 1 -->
+        <password-1>password-1</password-1> <!-- Пароль 1 -->
+        <login-2>login-2</login-2> <!-- Логин в Электронный Дневник 2 -->
+        <password-2>password-2</password-2> <!-- Пароль 2 -->
         <token>KEY</token> <!-- API VK -->
         <groupid>ID</groupid> <!-- ID группы -->
     </settings>
@@ -10,7 +12,12 @@
 
         <!-- Понедельник -->
         <day>
-            <lesson>НАЗВАНИЕ_ПРЕДМЕТА ССЫЛКА
+            <lesson>
+                НАЗВАНИЕ_ПРЕДМЕТА ССЫЛКА
+            </lesson>
+            <lesson>
+                НАЗВАНИЕ_ПРЕДМЕТА_(ГРУППА_1) ССЫЛКА
+                НАЗВАНИЕ_ПРЕДМЕТА_(ГРУППА_2) ССЫЛКА
             </lesson>
         </day>
 
