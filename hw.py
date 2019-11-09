@@ -29,13 +29,6 @@ def get_next_day():
     return day
 
 
-SESSION_1 = get_session(LOGIN_1, PASSWORD_1)
-SESSION_2 = get_session(LOGIN_2, PASSWORD_2)
-NEXT_DAY = get_next_day()
-NEXT_DAY_INT = get_next_day().isoweekday()
-
-
-
 def get_day_timetable(day):
     timetable = BeautifulSoup(XML, "lxml").find('timetable')
     timetable_of_day_raw = timetable.findAll('day')[day].find_all('lesson')
@@ -76,11 +69,15 @@ def get_res(day_int, is_next_day, rslt, ses1, ses2):
 
 class Homework:
     def __init__(self):
-        self.result = 'Домашнее задание на ' + str(NEXT_DAY.strftime('%d.%m.%Y')) + '\n' \
-             + 'Также читайте сайт класса: loxxx.tk ' + '\n\n'
+        self.session_1 = get_session(LOGIN_1, PASSWORD_1)
+        self.session_2 = get_session(LOGIN_2, PASSWORD_2)
+        self.next_day = get_next_day()
+        self.next_day_int = get_next_day().isoweekday()
+        self.result = 'Домашнее задание на ' + str(self.next_day.strftime('%d.%m.%Y')) + '\n' \
+                      + 'Также читайте сайт класса: loxxx.tk ' + '\n\n'
 
     def get_tomorrow(self):
-        return get_res(NEXT_DAY_INT, True, self.result, SESSION_1, SESSION_2)
+        return get_res(self.next_day_int, True, self.result, self.session_1, self.session_2)
 
 
 if __name__ == '__main__':
