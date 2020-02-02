@@ -6,7 +6,6 @@
         <login-2>login-2</login-2> <!-- Логин в Электронный Дневник 2 -->
         <password-2>password-2</password-2> <!-- Пароль 2 -->
         <token>KEY</token> <!-- API VK -->
-        <groupid>ID</groupid> <!-- ID группы -->
     </settings>
     <timetable>
 
@@ -42,6 +41,11 @@
         </day>
 
         <!-- Суббота -->
+        <day>
+
+        </day>
+
+        <!-- Воскресенье -->
         <day>
 
         </day>
