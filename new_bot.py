@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import requests as r
 import datetime
 import vk_api
-from vk_api.longpoll import VkLongPoll
+from vk_api.bot_longpoll import VkBotLongPoll
 
 XML = open('settings.xml', 'r', encoding="utf-8").read()
 SETTINGS = BeautifulSoup(XML, "lxml").find('settings')
@@ -16,6 +16,8 @@ TOKEN = SETTINGS.find('token').text
 HELP_TEXT = open('doc.txt', 'r', encoding='UTF-8').read()
 TIMETABLE = BeautifulSoup(XML, "lxml").find('timetable')
 LESSONS_TIMETABLE_RAW = TIMETABLE.findAll('day')
+SPECIAL_ID = 391805157
+GROUP_ID = SETTINGS.find('group-id').text
 
 
 def get_dnevnik_ses(login, password):
@@ -47,7 +49,7 @@ def get_next_day():
             next_day_int_2_weeks = i
             break
 
-    delta = next_day_int_2_weeks - (today_day_int - 1)
+    delta = next_day_int_2_weeks - today_day_int
     next_day = today_day + datetime.timedelta(delta)
 
     next_day_int = next_day_int_2_weeks - 7
@@ -94,27 +96,28 @@ def get_homework(day_int, rslt, ses1, ses2, is_next_day=True):
         return None
 
 
-VK_SESSION = vk_api.VkApi(token=TOKEN)
-LONGPOLL = VkLongPoll(VK_SESSION)
-VK = VK_SESSION.get_api()
+SES_1 = get_dnevnik_ses(LOGIN_1, PASSWORD_1)
+SES_2 = get_dnevnik_ses(LOGIN_2, PASSWORD_2)
+
+VK = vk_api.VkApi(token=TOKEN)
+VK.get_api()
+LONGPOLL = VkBotLongPoll(VK, GROUP_ID)
+
 
 for event in LONGPOLL.listen():
-    if event.to_me and '!ботдз' in event.text.lower()[0:6:]:
-        NEXT_DAY, NEXT_DAY_INT = get_next_day()
-        SES_1 = get_dnevnik_ses(LOGIN_1, PASSWORD_1)
-        SES_2 = get_dnevnik_ses(LOGIN_2, PASSWORD_2)
+    if str(event.type) == "VkBotEventType.MESSAGE_NEW":
+        if event.object.text.lower() == 'ботдз':
+            NEXT_DAY, NEXT_DAY_INT = get_next_day()
 
-        RAW_RES = 'Домашнее задание на ' + str(NEXT_DAY.strftime('%d.%m.%Y')) + '\n' \
-                  + 'Также читайте сайт класса: loxxx.tk ' + '\n\n'
+            RAW_RES = 'Домашнее задание на ' + str(NEXT_DAY.strftime('%d.%m.%Y')) + '\n' \
+                      + 'Также читайте сайт класса: loxxx.tk ' + '\n\n'
 
-        HOMEWORK = get_homework(NEXT_DAY_INT, RAW_RES, SES_1, SES_2)
-        if event.from_user:
-            if event.user_id == 391805157:
-                VK.messages.send(user_id=event.user_id, message=HOMEWORK+'\nХорошего дня, Данечка', random_id=0)
+            HOMEWORK = get_homework(NEXT_DAY_INT, RAW_RES, SES_1, SES_2)
+            if event.object.from_id == SPECIAL_ID:
+                VK.method("messages.send",
+                          {"peer_id": event.object.peer_id,
+                           "message": HOMEWORK + '\nХорошего дня, Данечка', "random_id": 0})
             else:
-                VK.messages.send(user_id=event.user_id, message=HOMEWORK, random_id=0)
-        elif event.from_chat:
-            if event.user_id == 391805157:
-                VK.messages.send(chat_id=event.chat_id, message=HOMEWORK + '\nХорошего дня, Данечка', random_id=0)
-            else:
-                VK.messages.send(chat_id=event.chat_id, message=HOMEWORK, random_id=0)
+                VK.method("messages.send",
+                          {"peer_id": event.object.peer_id,
+                           "message": HOMEWORK, "random_id": 0})

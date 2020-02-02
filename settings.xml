@@ -6,6 +6,7 @@
         <login-2>login-2</login-2> <!-- Логин в Электронный Дневник 2 -->
         <password-2>password-2</password-2> <!-- Пароль 2 -->
         <token>KEY</token> <!-- API VK -->
+        <group-id>ID</group-id> <!-- ID группы -->
     </settings>
     <timetable>
 
