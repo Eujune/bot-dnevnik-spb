@@ -13,7 +13,6 @@ LOGIN_2 = SETTINGS.find('login-2').text
 PASSWORD_2 = SETTINGS.find('password-2').text
 
 TOKEN = SETTINGS.find('token').text
-HELP_TEXT = open('doc.txt', 'r', encoding='UTF-8').read()
 TIMETABLE = BeautifulSoup(XML, "lxml").find('timetable')
 LESSONS_TIMETABLE_RAW = TIMETABLE.findAll('day')
 SPECIAL_ID = 391805157
@@ -96,9 +95,6 @@ def get_homework(day_int, rslt, ses1, ses2, is_next_day=True):
         return None
 
 
-SES_1 = get_dnevnik_ses(LOGIN_1, PASSWORD_1)
-SES_2 = get_dnevnik_ses(LOGIN_2, PASSWORD_2)
-
 VK = vk_api.VkApi(token=TOKEN)
 VK.get_api()
 LONGPOLL = VkBotLongPoll(VK, GROUP_ID)
@@ -109,10 +105,16 @@ for event in LONGPOLL.listen():
         if event.object.text.lower() == 'ботдз':
             NEXT_DAY, NEXT_DAY_INT = get_next_day()
 
+            SES_1 = get_dnevnik_ses(LOGIN_1, PASSWORD_1)
+            SES_2 = get_dnevnik_ses(LOGIN_2, PASSWORD_2)
+
             RAW_RES = 'Домашнее задание на ' + str(NEXT_DAY.strftime('%d.%m.%Y')) + '\n' \
                       + 'Также читайте сайт класса: loxxx.tk ' + '\n\n'
 
             HOMEWORK = get_homework(NEXT_DAY_INT, RAW_RES, SES_1, SES_2)
+
+            SES_1.close()
+            SES_2.close()
             if event.object.from_id == SPECIAL_ID:
                 VK.method("messages.send",
                           {"peer_id": event.object.peer_id,
