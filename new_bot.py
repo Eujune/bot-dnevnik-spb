@@ -46,7 +46,6 @@ def get_next_day():
     c_delta = None
 
     for i in range(1, 15):
-        print(day_map_2_weeks[i-1], i)
         if day_map_2_weeks[i-1] and today_day_int < i:
             if i > 7:
                 next_day_int = i - 7
@@ -89,7 +88,7 @@ def get_lesson_homework(lsn, ses):
 def get_homework(day_int, rslt, ses1, ses2, is_next_day=True):
 
     if is_next_day:
-        for lsn in get_day_timetable(day_int):
+        for lsn in get_day_timetable(day_int-1):
 
             if len(lsn) == 2:
                 rslt += get_lesson_homework(lsn, ses1)
@@ -109,7 +108,7 @@ LONGPOLL = VkBotLongPoll(VK, GROUP_ID)
 for event in LONGPOLL.listen():
     if str(event.type) == "VkBotEventType.MESSAGE_NEW":
         if event.object.text.lower() == 'ботдз':
-            NEXT_DAY, NEXT_DAY_INT = get_next_day()
+            NEXT_DAY_INT, NEXT_DAY = get_next_day()
 
             SES_1 = get_dnevnik_ses(LOGIN_1, PASSWORD_1)
             SES_2 = get_dnevnik_ses(LOGIN_2, PASSWORD_2)
