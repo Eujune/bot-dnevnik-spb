@@ -21,7 +21,8 @@ GROUP_ID = SETTINGS.find('group-id').text
 
 def get_dnevnik_ses(login, password):
     session = r.Session()
-    data = {'Login': login, 'Password': password, 'doLogin': 1, 'authsubmit': 'Войти'}
+    data = {'Login': login, 'Password': password,
+            'doLogin': 1, 'authsubmit': 'Войти'}
     session.get('https://dnevnik2.petersburgedu.ru/login')
     session.post('https://petersburgedu.ru/user/auth/login/n', data=data)
     return session
@@ -31,9 +32,9 @@ def get_day_map():
     res = []
     for i in range(0, 7):
         if LESSONS_TIMETABLE_RAW[i].find_all('lesson'):
-            res.append(1)
+            res.append(True)
         else:
-            res.append(0)
+            res.append(False)
     return res
 
 
@@ -41,21 +42,24 @@ def get_next_day():
     today_day = datetime.datetime.now()
     today_day_int = datetime.datetime.now().isoweekday()
     day_map_2_weeks = get_day_map() * 2
-    next_day_int_2_weeks = None
+    next_day_int = None
+    c_delta = None
 
-    for i in range(today_day_int + 1, 14):
-        if day_map_2_weeks[i] == 1:
-            next_day_int_2_weeks = i
+    for i in range(1, 15):
+        print(day_map_2_weeks[i-1], i)
+        if day_map_2_weeks[i-1] and today_day_int < i:
+            if i > 7:
+                next_day_int = i - 7
+                c_delta = 7
+            else:
+                next_day_int = i
+                c_delta = 0
             break
 
-    delta = next_day_int_2_weeks - today_day_int
+    delta = next_day_int - today_day_int + c_delta
     next_day = today_day + datetime.timedelta(delta)
 
-    next_day_int = next_day_int_2_weeks - 7
-    if next_day_int < 0:
-        next_day_int += 7
-
-    return next_day, next_day_int
+    return next_day_int, next_day
 
 
 def get_day_timetable(day):
@@ -83,8 +87,10 @@ def get_lesson_homework(lsn, ses):
 
 
 def get_homework(day_int, rslt, ses1, ses2, is_next_day=True):
+
     if is_next_day:
-        for lsn in get_day_timetable(day_int-1):
+        for lsn in get_day_timetable(day_int):
+
             if len(lsn) == 2:
                 rslt += get_lesson_homework(lsn, ses1)
             else:
