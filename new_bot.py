@@ -107,6 +107,7 @@ LONGPOLL = VkBotLongPoll(VK, GROUP_ID)
 
 for event in LONGPOLL.listen():
     if str(event.type) == "VkBotEventType.MESSAGE_NEW":
+
         if event.object.text.lower() == 'ботдз':
             NEXT_DAY_INT, NEXT_DAY = get_next_day()
 
@@ -128,3 +129,46 @@ for event in LONGPOLL.listen():
                 VK.method("messages.send",
                           {"peer_id": event.object.peer_id,
                            "message": HOMEWORK, "random_id": 0})
+        elif event.object.text.lower() == 'коронавирус':
+            corona_world_data = r.get('https://coronavirus-tracker-api.herokuapp.com/v2/latest').json()
+            infected = corona_world_data["latest"]["confirmed"]
+            deaths = corona_world_data["latest"]["deaths"]
+            recovered = corona_world_data["latest"]["recovered"]
+
+            corona_ru_data = r.get('https://coronavirus-tracker-api.herokuapp.com/v2/locations/187').json()
+            infected_ru = corona_ru_data["location"]["latest"]["confirmed"]
+            deaths_ru = corona_ru_data["location"]["latest"]["deaths"]
+            recovered_ru = corona_ru_data["location"]["latest"]["recovered"]
+
+            corona_message = "Заражённых в мире - {}" \
+                             "\nПогибло в мире - {}" \
+                             "\nВыздоровело в мире - {}".format(infected, deaths, recovered) + \
+                             "\nЗаражённых в РФ - {}" \
+                             "\nПогибло в РФ - {}" \
+                             "\nВыздоровело в РФ - {}".format(infected_ru, deaths_ru, recovered_ru) + \
+                             "\nСделано с помощью https://clck.ru/MdndU"
+
+            VK.method("messages.send",
+                      {"peer_id": event.object.peer_id, "message": corona_message, "random_id": 0})
+
+        elif event.object.text.lower() == 'курс':
+            exch_data = r.get("https://www.cbr-xml-daily.ru/daily_json.js").json()
+            usd_rub = exch_data["Valute"]["USD"]["Value"]
+            eur_rub = exch_data["Valute"]["EUR"]["Value"]
+
+            brent_soup = BeautifulSoup(r.get("https://www.calc.ru/kurs-Brent-online.html").text, 'html.parser')
+            brent_price_soup = str(brent_soup.find('div', class_="t18"))
+            brent_price = BeautifulSoup(brent_price_soup, 'html.parser').find("strong").text[:-20:]
+
+            btc_soup = BeautifulSoup(r.get("https://www.calc.ru/Bitcoin-k-dollaru-online.html").text, 'html.parser')
+            btc_price_soup = str(btc_soup.find('div', class_="t18"))
+            btc_price = BeautifulSoup(btc_price_soup, 'html.parser').find_all("b")[1].text[:-4:].replace(' ', '')
+
+            exch_message = "Цена 1 доллара в рублях - {}" \
+                           "\nЦена 1 евро в рублях - {}".format(usd_rub, eur_rub) + \
+                           "\nЦена нефти Brent в долларах за баррель - {}" \
+                           "\nЦена 1 BTC в долларах - {}".format(brent_price, btc_price) + \
+                           "\nСделано с помощью https://clck.ru/Mdod7"
+
+            VK.method("messages.send",
+                      {"peer_id": event.object.peer_id, "message": exch_message, "random_id": 0})
