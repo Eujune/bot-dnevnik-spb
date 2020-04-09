@@ -109,7 +109,9 @@ for event in LONGPOLL.listen():
     if str(event.type) == "VkBotEventType.MESSAGE_NEW":
         if event.object.text.lower() == 'ботдз':
             VK.method("messages.send",
-                      {"peer_id": event.object.peer_id, "message": 'Данная опция временно отключена', "random_id": 0})
+                      {"peer_id": event.object.peer_id, "message": 'Данная опция временно отключена.\n'
+                                                                   'Получайте информацию в @9adistanc (группе)'
+                                                                   ' и подписывайтесь на рассылку', "random_id": 0})
             # NEXT_DAY_INT, NEXT_DAY = get_next_day()
             #
             # SES_1 = get_dnevnik_ses(LOGIN_1, PASSWORD_1)
